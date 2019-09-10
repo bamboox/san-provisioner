@@ -1,0 +1,16 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: san-bamboo-claim-3
+  annotations:
+    #"volume.beta.kubernetes.io/mount-options":"rw,"
+    #default ext4
+    "volume.beta.kubernetes.io/mkfs-fstype": "xfs"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: managed-san-storage
+  volumeMode: Filesystem

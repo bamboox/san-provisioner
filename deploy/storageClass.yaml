@@ -1,0 +1,15 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: managed-san-storage
+provisioner: kubernetes.com/san # or choose another name, must match deployment's env PROVISIONER_NAME'
+#allowVolumeExpansion: true
+parameters:
+  #sanCliPipelineEndpoint: "san-cli-pipeline.kube-system:8080" # TODO
+  sanserver: "198.18.4.6" # san server host
+  user: "admin" # san server admin
+  password: "nopwd" # san server password ,use authorized_keys
+  fsType: ext4 # TODO
+  type: cloud_ssd # TODO
+  readOnly: "false" # TODO
+reclaimPolicy: Delete # k8s reclaimPolicy: Retain, Recycle, Delete 

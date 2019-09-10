@@ -1,0 +1,99 @@
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: san-client-provisioner
+  namespace: kube-system
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: san-client-provisioner-runner
+  namespace: kube-system
+rules:
+  - apiGroups: [""]
+    resources: ["persistentvolumes"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "watch", "update"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["storageclasses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: run-san-client-provisioner
+subjects:
+  - kind: ServiceAccount
+    name: san-client-provisioner
+    namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: san-client-provisioner-runner
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: leader-locking-san-client-provisioner
+  namespace: kube-system
+rules:
+  - apiGroups: [""]
+    resources: ["endpoints"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: leader-locking-san-client-provisioner
+  namespace: kube-system
+subjects:
+  - kind: ServiceAccount
+    name: san-client-provisioner
+    # replace with namespace where provisioner is deployed
+    namespace: kube-system
+roleRef:
+  kind: Role
+  name: leader-locking-san-client-provisioner
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: san-client-provisioner
+  namespace: kube-system
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: san-client-provisioner
+    spec:
+      serviceAccountName: san-client-provisioner
+      containers:
+        - name: san-client-provisioner
+          image: registry.cn-hangzhou.aliyuncs.com/bamboo/san-client:0.0.1
+          imagePullPolicy: Always
+          command:
+            - /main
+          args:
+            - "--v=5"
+          env:
+            - name: PROVISIONER_NAME
+              value: kubernetes.com/san
+          volumeMounts:
+            - mountPath: /root/.ssh
+              name: ssh-client
+      volumes:
+        - name: ssh-client
+          hostPath:
+            path: /root/.ssh

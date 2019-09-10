@@ -1,0 +1,21 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: test-pod-2
+spec:
+  containers:
+    - name: test-pod
+      image: registry.cn-hangzhou.aliyuncs.com/bamboo/busybox:1.31.0	
+      command:
+      - "/bin/sh"
+      - "-c"
+      - "sleep 100000"
+      volumeMounts:
+        - name: san-bamboo-vol
+          mountPath: "/mnt"
+          readOnly: true
+  restartPolicy: "Never"
+  volumes:
+    - name: san-bamboo-vol
+      persistentVolumeClaim:
+        claimName: san-bamboo-claim-3

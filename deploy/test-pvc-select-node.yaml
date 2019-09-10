@@ -1,0 +1,15 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: san-bamboo-claim-2
+  annotations:
+    "volume.kubernetes.io/selected-node": "dbm02"
+#    volume.beta.kubernetes.io/storage-class: "managed-san-storage"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: managed-san-storage
+  volumeMode: Filesystem
