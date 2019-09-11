@@ -10,7 +10,7 @@ RUN mkdir -p $DIR
 COPY / $DIR
 
 ENV  GO111MODULE=on
-# setting go mod proxy, proxy run on onebox
+
 ENV  GOPROXY=https://goproxy.io
 #RUN  go mod tidy
 #RUN  go mod vendor
@@ -22,7 +22,6 @@ FROM alpine:3.9
 
 ARG APK_MIRROR=mirrors.aliyun.com
 RUN sed -i "s/dl-cdn.alpinelinux.org/${APK_MIRROR}/g" /etc/apk/repositories
-
 RUN apk add --no-cache libc6-compat
 ## DON'T modify above, as it's common for all Alpine based parent and docker caching layer will used
 
